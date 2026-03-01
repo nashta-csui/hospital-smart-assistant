@@ -11,6 +11,20 @@ from app.models.rag.dokumen import Dokumen
 
 
 class ChunkDokumen(Base):
+    """
+    ChunkDokumen yang dapat di-index berdasarkan HNSW dengan
+    metrik kedekatan L2 (euclidean) distance
+
+    Berikut adalah contoh query yang dapat dibuat:
+    ```
+    from sqlalchemy import select
+
+    stmt = select(ChunkDokumen).order_by(
+        ChunkDokumen.embedding.l2_distance(query_embedding)
+    ).limit(5)
+    ```
+    """
+
     id: Mapped[UUID] = mapped_column(primary_key=True)
 
     doc_id: Mapped[UUID] = mapped_column(ForeignKey("dokumen.id"))
