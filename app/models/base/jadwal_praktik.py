@@ -8,8 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 # INFO: Diperlukan untuk mencegah circular import dan invalid type saat development
 if TYPE_CHECKING:
-    from models.base.dokter import Dokter
-    from models.base.sesi_konsultasi import SesiKonsultasi
+    from app.models.base.dokter import Dokter
+    from app.models.base.sesi_konsultasi import SesiKonsultasi
 
 
 class JadwalPraktik(Base):
@@ -47,6 +47,7 @@ class JadwalPraktik(Base):
 
     __table_args__ = {
         CheckConstraint(
-            "hari_dalam_minggu >= 1 AND hari_dalam_minggu <= 7", name="cek_indeks_hari"
+            "hari_dalam_minggu >= 1 AND hari_dalam_minggu <= 7",
+            name="cek_indeks_hari",
         )
     }

@@ -4,11 +4,11 @@ from uuid import UUID, uuid4
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base.base_model import Base, Email, NomorTelepon
+from app.models.base.base_model import Base, Email, NomorTelepon
 
 # INFO: Diperlukan untuk mencegah circular import dan invalid type saat development
 if TYPE_CHECKING:
-    from models.base.jadwal_praktik import JadwalPraktik
+    from app.models.base.jadwal_praktik import JadwalPraktik
 
 
 class Dokter(Base):

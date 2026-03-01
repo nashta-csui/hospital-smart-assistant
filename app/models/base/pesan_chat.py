@@ -6,11 +6,11 @@ from uuid import UUID, uuid4
 from sqlalchemy import Enum, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base.base_model import Base
+from app.models.base.base_model import Base
 
 # INFO: Diperlukan untuk mencegah circular import dan invalid type saat development
 if TYPE_CHECKING:
-    from models.base.sesi_chat import SesiChat
+    from app.models.base.sesi_chat import SesiChat
 
 
 class SenderType(enum.Enum):

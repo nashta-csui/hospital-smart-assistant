@@ -1,8 +1,9 @@
 import datetime
 from typing import Any
-from sqlalchemy import DateTime, Date, String, Time
-from sqlalchemy.types import JSON
+
+from sqlalchemy import Date, DateTime, String, Time
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.types import JSON
 
 # Type aliasing agar tipe data memiliki makna semantik
 type NomorTelepon = str

@@ -6,12 +6,12 @@ from uuid import UUID, uuid4
 from sqlalchemy import Enum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base.base_model import Base, Email, NomorTelepon
+from app.models.base.base_model import Base, Email, NomorTelepon
 
 # INFO: Diperlukan untuk mencegah circular import dan invalid type saat development
 if TYPE_CHECKING:
-    from models.base.sesi_chat import SesiChat
-    from models.base.sesi_konsultasi import SesiKonsultasi
+    from app.models.base.sesi_chat import SesiChat
+    from app.models.base.sesi_konsultasi import SesiKonsultasi
 
 
 class JenisKelamin(enum.Enum):

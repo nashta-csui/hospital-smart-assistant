@@ -5,13 +5,13 @@ from uuid import UUID, uuid4
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base.base_model import Base
+from app.models.base.base_model import Base
 
 # INFO: Diperlukan untuk mencegah circular import dan invalid type saat development
 if TYPE_CHECKING:
-    from models.base.pasien import Pasien
-    from models.base.pesan_chat import PesanChat
-    from models.base.sesi_konsultasi import SesiKonsultasi
+    from app.models.base.pasien import Pasien
+    from app.models.base.pesan_chat import PesanChat
+    from app.models.base.sesi_konsultasi import SesiKonsultasi
 
 
 class SesiChat(Base):

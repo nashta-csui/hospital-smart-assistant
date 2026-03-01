@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.models.base.base_model import Base, Email
 
 
