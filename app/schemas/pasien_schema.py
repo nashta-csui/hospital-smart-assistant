@@ -16,11 +16,11 @@ class UpdateProfilePayload(BaseModel):
         if isinstance(v, str):
             v = v.replace(" ", "").replace("-", "")
             if not v:
-                raise ValueError()
+                raise ValueError("Phone cannot be empty")
             if not v.isdigit():
-                raise ValueError()
+                raise ValueError("Phone must contain only numbers")
             if len(v) < 10 or len(v) > 15:
-                raise ValueError()
+                raise ValueError("Phone length must be between 10 and 15 digits")
         return v
 
     @field_validator("password")
@@ -28,15 +28,15 @@ class UpdateProfilePayload(BaseModel):
     def validate_password(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
             if len(v) < 8:
-                raise ValueError()
+                raise ValueError("Password must be at least 8 characters long")
             if not any(c.isdigit() for c in v):
-                raise ValueError()
+                raise ValueError("Password must contain at least one digit")
         return v
 
     @model_validator(mode="after")
     def check_at_least_one_field(self) -> "UpdateProfilePayload":
         if not self.model_dump(exclude_unset=True):
-            raise ValueError()
+            raise ValueError("Update payload cannot be empty. Must provide at least one field to update.")
         return self
 
 class ProfileResponse(BaseModel):
