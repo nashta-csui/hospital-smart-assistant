@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 from unittest.mock import Mock, MagicMock, patch
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from app.schemas.dokter import DokterRegisterRequest
 from app.repositories.dokter_repository import DokterRepository, SQLAlchemyDokterRepository
@@ -80,6 +81,20 @@ class TestPasswordService:
 
         # Assert
         assert result is False
+
+    def test_hash_password_should_raise_invalid_password_error(self):
+        from unittest.mock import patch
+        from app.services.dokter_service import PasswordService
+        from app.exceptions import InvalidPasswordError
+
+        service = PasswordService()
+
+        with patch(
+            "argon2.PasswordHasher.hash",
+            side_effect=Exception("fail")
+        ):
+            with pytest.raises(InvalidPasswordError):
+                service.hash_password("password")
 
 
 class TestDokterRegistrationService:
@@ -361,3 +376,44 @@ class TestDokterRepository:
         with pytest.raises(DuplicateEmailError):
             dokter_repository.create(dokter2)
 
+    def test_create_should_raise_database_error_on_sqlalchemy_error(
+        self,
+        dokter_repository,
+        password_service
+    ):
+        dokter = Dokter(
+            id=UUID("550e8400-e29b-41d4-a716-446655440000"),
+            nama="Dr. Error",
+            email="error@hospital.com",
+            no_telepon="081234567890",
+            password_hash=password_service.hash_password("SecurePass123!"),
+            spesialisasi="Kardiologi",
+            is_active=True,
+        )
+
+        with patch.object(dokter_repository.session, "commit", side_effect=SQLAlchemyError("fail")):
+            with pytest.raises(DatabaseError):
+                dokter_repository.create(dokter)
+
+
+    def test_get_by_email_should_raise_database_error(
+        self,
+        dokter_repository
+    ):
+        with patch.object(dokter_repository.session, "query", side_effect=SQLAlchemyError("fail")):
+            with pytest.raises(DatabaseError):
+                dokter_repository.get_by_email("test@test.com")
+
+    def test_abstract_repository_methods(self):
+        class DummyRepo(DokterRepository):
+            def create(self, dokter): pass
+            def get_by_email(self, email): pass
+            def get_by_id(self, dokter_id): pass
+            def exists_by_email(self, email): pass
+
+        repo = DummyRepo()
+
+        repo.create(None)
+        repo.get_by_email("a")
+        repo.get_by_id(None)
+        repo.exists_by_email("a")
