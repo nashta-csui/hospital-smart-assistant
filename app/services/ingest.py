@@ -1,7 +1,13 @@
 import datetime
 from pathlib import Path
+from uuid import uuid4
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from sqlalchemy.orm import Session
+
+from app.models.rag.chunk_dokumen import ChunkDokumen
+from app.models.rag.dokumen import Dokumen
+from app.services import get_embedding_model
 
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
@@ -43,3 +49,41 @@ def chunk_text(
         separators=["\n\n", "\n", ". ", " ", ""],
     )
     return splitter.split_text(text)
+
+
+def ingest_documents(db: Session, data_dir: Path) -> int:
+    """
+    Full ingestion pipeline: load RAG files, chunk, embed, store in DB.
+
+    Returns the number of documents ingested.
+    """
+    model = get_embedding_model()
+    docs = load_documents(data_dir)
+
+    for filename, text in docs:
+        doc = Dokumen(
+            id=uuid4(),
+            filename=filename,
+            rawtext=text,
+            uploaded_at=datetime.datetime.now(datetime.timezone.utc),
+        )
+        db.add(doc)
+        db.flush()
+
+        chunks = chunk_text(text)
+        if not chunks:
+            continue
+
+        embeddings = model.encode(chunks)
+
+        for content, embedding in zip(chunks, embeddings):
+            chunk_record = ChunkDokumen(
+                id=uuid4(),
+                doc_id=doc.id,
+                content=content,
+                embedding=embedding.tolist(),
+            )
+            db.add(chunk_record)
+
+    db.commit()
+    return len(docs)
