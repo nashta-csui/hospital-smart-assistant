@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from app.services.ingest import load_documents
+from app.services.ingest import chunk_text, load_documents
 
 
 class TestLoadDocuments:
@@ -55,3 +55,64 @@ class TestLoadDocuments:
         assert "RAG_Direktori_Asuransi.txt" in filenames
         assert "RAG_FAQ_Fasilitas_RS.txt" in filenames
         assert "RAG_SOP_BPJS_Rujukan.txt" in filenames
+
+
+class TestChunkText:
+    """Tests for chunk_text: splits text into overlapping chunks."""
+
+    def test_splits_text_into_chunks(self):
+        """Should split text into multiple chunks."""
+        text = "Seksi A\n\nSeksi B\n\nSeksi C\n\nSeksi D"
+        chunks = chunk_text(text, chunk_size=20, chunk_overlap=0)
+        assert len(chunks) > 1
+
+    def test_respects_chunk_size(self):
+        """Each chunk should not exceed chunk_size (with some tolerance)."""
+        text = (
+            "Paragraf satu berisi informasi.\n\n"
+            "Paragraf dua berisi data.\n\n"
+            "Paragraf tiga."
+        )
+        chunks = chunk_text(text, chunk_size=40, chunk_overlap=0)
+        for chunk in chunks:
+            assert len(chunk) <= 60
+
+    def test_overlap_creates_redundancy(self):
+        """With overlap, adjacent chunks should share some content."""
+        text = "AAAA BBBB CCCC DDDD EEEE FFFF GGGG HHHH"
+        chunks_no_overlap = chunk_text(text, chunk_size=20, chunk_overlap=0)
+        chunks_with_overlap = chunk_text(text, chunk_size=20, chunk_overlap=5)
+        assert len(chunks_with_overlap) >= len(chunks_no_overlap)
+
+    def test_empty_text_returns_empty_list(self):
+        """Should return empty list for empty text."""
+        chunks = chunk_text("", chunk_size=500, chunk_overlap=50)
+        assert chunks == []
+
+    def test_short_text_returns_single_chunk(self):
+        """Text shorter than chunk_size should return one chunk."""
+        text = "Short text."
+        chunks = chunk_text(text, chunk_size=500, chunk_overlap=50)
+        assert len(chunks) == 1
+        assert chunks[0] == "Short text."
+
+    def test_prefers_paragraph_separators(self):
+        """Should split on paragraph boundaries (double newline)."""
+        text = "Paragraf satu.\n\nParagraf dua."
+        chunks = chunk_text(text, chunk_size=20, chunk_overlap=0)
+        assert any("Paragraf satu." in c for c in chunks)
+        assert any("Paragraf dua." in c for c in chunks)
+
+    def test_default_parameters(self):
+        """Should work with default chunk_size=500 and chunk_overlap=50."""
+        text = "A" * 1000
+        chunks = chunk_text(text)
+        assert len(chunks) > 1
+
+    def test_preserves_all_content(self):
+        """Union of all chunks should contain all original content."""
+        text = "Satu Dua Tiga Empat Lima"
+        chunks = chunk_text(text, chunk_size=15, chunk_overlap=0)
+        combined = " ".join(chunks)
+        for word in ["Satu", "Dua", "Tiga", "Empat", "Lima"]:
+            assert word in combined
