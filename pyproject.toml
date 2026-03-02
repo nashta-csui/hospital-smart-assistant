@@ -26,3 +26,7 @@ dev = [
 [tool.ruff]
 # Disesuaikan dengan Black formatter
 line-length = 88
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["app/tests"]
