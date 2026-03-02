@@ -1,5 +1,10 @@
+import os
+
 from fastapi.testclient import TestClient
-from main import app
+
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+
+from app.main import app
 
 client = TestClient(app)
 
