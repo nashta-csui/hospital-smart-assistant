@@ -1,7 +1,11 @@
-import hashlib
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
 from app.repositories.interfaces import IPasienRepository
 from app.schemas.pasien_schema import UpdateProfilePayload
 from app.domain.pasien import Pasien
+
+password_hasher = PasswordHasher()
 
 class NotFoundException(Exception):
     pass
@@ -12,7 +16,14 @@ def mask_phone_number(no_hp: str) -> str:
     return no_hp
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    return password_hasher.hash(password)
+
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    try:
+        return password_hasher.verify(hashed_password, password)
+    except VerifyMismatchError:
+        return False
 
 def get_profile(repo: IPasienRepository, pasien_id: str) -> Pasien:
     pasien = repo.get_by_id(pasien_id)

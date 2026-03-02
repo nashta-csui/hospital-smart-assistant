@@ -1,4 +1,3 @@
-import hashlib
 import pytest
 from pydantic import ValidationError
 from app.domain.pasien import Pasien
@@ -11,6 +10,7 @@ from app.services.pasien_profile_service import (
     NotFoundException,
     mask_phone_number,
     hash_password,
+    verify_password,
 )
 
 @pytest.fixture
@@ -117,8 +117,12 @@ def test_update_profile_reject_golongan_darah_field(repo):
 def test_mask_phone_number_short():
     assert mask_phone_number("12345") == "12345"
 
-def test_hash_password_matches_hashlib():
-    assert hash_password("abc123") == hashlib.sha256(b"abc123").hexdigest()
+def test_hash_password_uses_argon2_and_can_verify():
+    hashed = hash_password("abc12345")
+    assert hashed.startswith("$argon2")
+    assert hashed != "abc12345"
+    assert verify_password("abc12345", hashed)
+    assert not verify_password("wrongpass", hashed)
 
 def test_update_profile_with_empty_payload_returns_same(repo):
     pasien_before = repo.get_by_id("1")
