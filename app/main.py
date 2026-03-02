@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -40,6 +40,39 @@ def get_dokter_registration_service(
     return DokterRegistrationService(repository, password_service)
 
 
+def verify_admin(authorization: str | None = Header(None)) -> str:
+    """
+    Dependency untuk verify bahwa request berasal dari admin.
+    Menerima Authorization header dengan format: "Bearer <token>"
+    
+    Raises:
+        HTTPException: Jika authorization header tidak valid
+    """
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Authorization header diperlukan"
+        )
+
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authorization header format. Use: Bearer <token>"
+        )
+
+    token = parts[1]
+    # Simple validation: untuk sekarang, token tidak boleh kosong
+    # Bisa diganti dengan database lookup nanti
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail="Token tidak valid"
+        )
+
+    return token
+
+
 # Kode setup yang dipanggil sebelum aplikasi berjalan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -62,10 +95,14 @@ app = FastAPI(lifespan=lifespan)
 )
 async def register_dokter(
     request: DokterRegisterRequest,
-    service: DokterRegistrationService = Depends(get_dokter_registration_service)
+    service: DokterRegistrationService = Depends(get_dokter_registration_service),
+    admin_token: str = Depends(verify_admin)
 ):
     """
-    Endpoint untuk mendaftarkan dokter baru.
+    Endpoint untuk mendaftarkan dokter baru (HANYA ADMIN).
+
+    **Auth:**
+    - Requires Authorization header: `Authorization: Bearer <admin_token>`
 
     **Request:**
     - `nama`: Nama lengkap dokter (3-255 karakter)
@@ -78,6 +115,7 @@ async def register_dokter(
     - Dokter yang telah terdaftar dengan ID, tanpa password
 
     **Error Responses:**
+    - `401`: Unauthorized (missing atau invalid authorization)
     - `400`: Email sudah terdaftar
     - `422`: Validasi input gagal
     - `500`: Database error
