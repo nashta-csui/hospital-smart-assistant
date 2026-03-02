@@ -1,5 +1,10 @@
+from unittest.mock import MagicMock
+
+import numpy as np
 import pytest
 from pathlib import Path
+
+from app.models.rag.consts import EMBEDDING_DIMS
 
 
 @pytest.fixture
@@ -34,3 +39,16 @@ def real_data_dir():
     if not data_dir.exists():
         pytest.skip("data/ directory not found")
     return data_dir
+
+
+@pytest.fixture
+def mock_embedding_model():
+    """Mock embedding model that returns fake 1024-dim vectors."""
+    model = MagicMock()
+    model.encode = MagicMock(
+        side_effect=lambda chunks: np.random.rand(
+            len(chunks) if isinstance(chunks, list) else 1,
+            EMBEDDING_DIMS,
+        ).astype(np.float32)
+    )
+    return model

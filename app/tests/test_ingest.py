@@ -1,8 +1,12 @@
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.services.ingest import chunk_text, load_documents
+from app.models.rag.chunk_dokumen import ChunkDokumen
+from app.models.rag.consts import EMBEDDING_DIMS
+from app.models.rag.dokumen import Dokumen
+from app.services.ingest import chunk_text, ingest_documents, load_documents
 
 
 class TestLoadDocuments:
@@ -116,3 +120,120 @@ class TestChunkText:
         combined = " ".join(chunks)
         for word in ["Satu", "Dua", "Tiga", "Empat", "Lima"]:
             assert word in combined
+
+
+class TestIngestDocuments:
+    """Tests for ingest_documents with mocked embedding model and DB session."""
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_creates_dokumen_for_each_file(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Should create one Dokumen per RAG file."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        ingest_documents(session, tmp_data_dir)
+
+        added = [call.args[0] for call in session.add.call_args_list]
+        dokumens = [obj for obj in added if isinstance(obj, Dokumen)]
+        assert len(dokumens) == 2
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_creates_chunk_records_with_embeddings(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Should create ChunkDokumen records with content and embeddings."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        ingest_documents(session, tmp_data_dir)
+
+        added = [call.args[0] for call in session.add.call_args_list]
+        chunks = [obj for obj in added if isinstance(obj, ChunkDokumen)]
+        assert len(chunks) > 0
+        for chunk in chunks:
+            assert chunk.content
+            assert chunk.embedding is not None
+            assert len(chunk.embedding) == EMBEDDING_DIMS
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_chunks_linked_to_dokumen(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Each ChunkDokumen.doc_id should match a Dokumen.id."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        ingest_documents(session, tmp_data_dir)
+
+        added = [call.args[0] for call in session.add.call_args_list]
+        dokumens = [obj for obj in added if isinstance(obj, Dokumen)]
+        chunks = [obj for obj in added if isinstance(obj, ChunkDokumen)]
+        doc_ids = {d.id for d in dokumens}
+        for chunk in chunks:
+            assert chunk.doc_id in doc_ids
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_calls_encode_with_chunk_texts(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Should call model.encode() with the chunked text."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        ingest_documents(session, tmp_data_dir)
+
+        assert mock_embedding_model.encode.called
+        for call in mock_embedding_model.encode.call_args_list:
+            chunks_arg = call.args[0]
+            assert isinstance(chunks_arg, list)
+            assert all(isinstance(c, str) for c in chunks_arg)
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_stores_rawtext_in_dokumen(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Dokumen.rawtext should contain the full file content."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        ingest_documents(session, tmp_data_dir)
+
+        added = [call.args[0] for call in session.add.call_args_list]
+        dokumens = [obj for obj in added if isinstance(obj, Dokumen)]
+        doc_a = next(d for d in dokumens if d.filename == "RAG_File_A.txt")
+        assert "konten pertama" in doc_a.rawtext
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_empty_directory_returns_zero(
+        self, mock_get_model, mock_embedding_model, empty_data_dir
+    ):
+        """Should return 0 and not add anything when no RAG files exist."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        count = ingest_documents(session, empty_data_dir)
+        assert count == 0
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_returns_document_count(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Should return the number of documents ingested."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        count = ingest_documents(session, tmp_data_dir)
+        assert count == 2
+
+    @patch("app.services.ingest.get_embedding_model")
+    def test_commits_session(
+        self, mock_get_model, mock_embedding_model, tmp_data_dir
+    ):
+        """Should commit the session after ingesting."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+
+        ingest_documents(session, tmp_data_dir)
+        session.commit.assert_called_once()
