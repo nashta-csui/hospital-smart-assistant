@@ -2,7 +2,7 @@ import datetime
 from typing import TYPE_CHECKING, List
 from uuid import UUID, uuid4
 
-from base_model import Base
+from app.models.base.base_model import Base
 from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,9 +45,9 @@ class JadwalPraktik(Base):
     )
     """Suatu jadwal praktik bisa memiliki lebih dari satu sesi konsultasi"""
 
-    __table_args__ = {
+    __table_args__ = (
         CheckConstraint(
             "hari_dalam_minggu >= 1 AND hari_dalam_minggu <= 7",
             name="cek_indeks_hari",
-        )
-    }
+        ),
+    )

@@ -25,6 +25,8 @@ class ChunkDokumen(Base):
     ```
     """
 
+    __tablename__ = "chunk_dokumen"
+
     id: Mapped[UUID] = mapped_column(primary_key=True)
 
     doc_id: Mapped[UUID] = mapped_column(ForeignKey("dokumen.id"))
@@ -40,13 +42,13 @@ class ChunkDokumen(Base):
     dokumen: Mapped["Dokumen"] = relationship(back_populates="daftar_chunk_dokumen")
     """Dokumen sumber chunk dokumen ini"""
 
-    __table_args__ = {
+    __table_args__ = (
         Index(
             "embedding_index",
             embedding,
             postgresql_using="hnsw",
             postgresql_with={"m": 16, "ef_construction": 64},
             postgresql_ops={"embedding": "vector_l2_ops"},
-        )
-    }
+        ),
+    )
     """Index embedding dibuat agar retrieval objek ChunkDokumen dengan embedding paling sesuai dengan query dapat ditemukan dengan cepat"""

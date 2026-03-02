@@ -1,0 +1,25 @@
+services:
+  db:
+    image: pgvector/pgvector:0.8.2-pg18-trixie@sha256:058fdb396f7b11f66cb7084db6c970846f8cb3a36b101b2714bea6727d530322
+    restart: always
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - db_data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    post_start:
+      - command:
+          psql -U postgres -h 127.0.0.1 -c "CREATE EXTENSION IF NOT EXISTS
+          vector;"
+        user: root
+
+  backend:
+    image: tbd
+    ports:
+      - "8000:8000"
+
+volumes:
+  db_data:
