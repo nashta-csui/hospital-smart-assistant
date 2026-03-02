@@ -1,13 +1,43 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from app.models.base.base_model import Base
+from app.models.base.dokter import Dokter
 from app.config import settings
+from app.schemas.dokter import DokterRegisterRequest, DokterRegisterResponse
+from app.repositories.dokter_repository import SQLAlchemyDokterRepository
+from app.services.dokter_service import DokterRegistrationService, PasswordService
+from app.exceptions import DuplicateEmailError, InvalidPasswordError, DatabaseError
 
 # Membuat engine SQLAlchemy untuk berkomunikasi dengan DB
 # Gunakan engine ini untuk membuat query
 engine = create_engine(settings.database_url)
+
+
+# Dependency injection untuk database session
+def get_db():
+    """Dependency untuk mendapatkan database session."""
+    db = Session(engine)
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+# Dependency injection untuk services
+def get_password_service():
+    """Dependency untuk PasswordService."""
+    return PasswordService()
+
+def get_dokter_registration_service(
+    db: Session = Depends(get_db),
+    password_service: PasswordService = Depends(get_password_service)
+):
+    """Dependency untuk DokterRegistrationService."""
+    repository = SQLAlchemyDokterRepository(db)
+    return DokterRegistrationService(repository, password_service)
 
 
 # Kode setup yang dipanggil sebelum aplikasi berjalan
@@ -21,6 +51,60 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.post(
+    "/dokter/register",
+    response_model=DokterRegisterResponse,
+    status_code=201,
+    summary="Register Doctor",
+    description="Admin mendaftarkan dokter baru dalam sistem"
+)
+async def register_dokter(
+    request: DokterRegisterRequest,
+    service: DokterRegistrationService = Depends(get_dokter_registration_service)
+):
+    """
+    Endpoint untuk mendaftarkan dokter baru.
+
+    **Request:**
+    - `nama`: Nama lengkap dokter (3-255 karakter)
+    - `email`: Email unik dokter
+    - `no_telepon`: Nomor telepon (10-20 digit)
+    - `password`: Password minimal 8 karakter
+    - `spesialisasi`: Spesialisasi dokter (2-255 karakter)
+
+    **Response (201 Created):**
+    - Dokter yang telah terdaftar dengan ID, tanpa password
+
+    **Error Responses:**
+    - `400`: Email sudah terdaftar
+    - `422`: Validasi input gagal
+    - `500`: Database error
+    """
+    try:
+        dokter = service.register_dokter(request)
+        return dokter
+    except DuplicateEmailError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Email sudah terdaftar: {str(e)}"
+        )
+    except InvalidPasswordError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Password tidak valid: {str(e)}"
+        )
+    except DatabaseError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 
 @app.get("/")
