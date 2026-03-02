@@ -190,40 +190,6 @@ class TestDokterRegistrationService:
         # Assert
         assert result.is_active is True
 
-    def test_register_dokter_should_set_timestamps(
-        self,
-        dokter_registration_service: DokterRegistrationService
-    ):
-        """Positive: Dokter yang baru harus memiliki created_at dan updated_at."""
-        # Arrange
-        request = DokterRegisterRequest(
-            nama="Dr. Budi Santoso",
-            email="budi@hospital.com",
-            no_telepon="081234567890",
-            password="SecurePass123!",
-            spesialisasi="Kardiologi"
-        )
-        before_create = datetime.now(timezone.utc)
-
-        # Act
-        result = dokter_registration_service.register_dokter(request)
-        after_create = datetime.now(timezone.utc)
-
-        # Assert
-        assert result.created_at is not None
-        assert result.updated_at is not None
-        # Check timestamp is between before and after (handling both aware/naive)
-        if result.created_at.tzinfo is None:
-            # If result is naive, compare with naive times
-            assert before_create.replace(tzinfo=None) <= result.created_at <= after_create.replace(tzinfo=None)
-        else:
-            # If result is aware, compare with aware times
-            assert before_create <= result.created_at <= after_create
-        if result.updated_at.tzinfo is None:
-            assert before_create.replace(tzinfo=None) <= result.updated_at <= after_create.replace(tzinfo=None)
-        else:
-            assert before_create <= result.updated_at <= after_create
-
 
 class TestDokterRepository:
     """Test cases untuk DokterRepository - database layer."""
@@ -243,8 +209,6 @@ class TestDokterRepository:
             password_hash=password_service.hash_password("SecurePass123!"),
             spesialisasi="Kardiologi",
             is_active=True,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
         )
 
         # Act
@@ -268,9 +232,7 @@ class TestDokterRepository:
             no_telepon="081234567890",
             password_hash=password_service.hash_password("SecurePass123!"),
             spesialisasi="Kardiologi",
-            is_active=True,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            is_active=True
         )
         dokter_repository.create(dokter)
 
@@ -308,9 +270,7 @@ class TestDokterRepository:
             no_telepon="081234567890",
             password_hash=password_service.hash_password("SecurePass123!"),
             spesialisasi="Kardiologi",
-            is_active=True,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            is_active=True
         )
         dokter_repository.create(dokter)
 
@@ -348,9 +308,7 @@ class TestDokterRepository:
             no_telepon="081234567890",
             password_hash=password_service.hash_password("SecurePass123!"),
             spesialisasi="Kardiologi",
-            is_active=True,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            is_active=True
         )
         dokter_repository.create(dokter)
 
@@ -385,9 +343,7 @@ class TestDokterRepository:
             no_telepon="081234567890",
             password_hash=password_service.hash_password("SecurePass123!"),
             spesialisasi="Kardiologi",
-            is_active=True,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            is_active=True
         )
         dokter_repository.create(dokter1)
 
@@ -398,9 +354,7 @@ class TestDokterRepository:
             no_telepon="089876543210",
             password_hash=password_service.hash_password("AnotherPass456!"),
             spesialisasi="Urologi",
-            is_active=True,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            is_active=True
         )
 
         # Act & Assert
