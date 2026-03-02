@@ -8,4 +8,3 @@ class Pasien(BaseModel):
     alamat: str
     golongan_darah: str
     password_hash: str
-    version_id: int = 1
