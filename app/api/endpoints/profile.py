@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.pasien_schema import ProfileResponse, UpdateProfilePayload
 from app.api.deps import get_repo, get_current_user_id
@@ -6,10 +8,14 @@ from app.services.pasien_profile_service import get_profile, update_profile, mas
 
 router = APIRouter()
 
-@router.get("/profile", response_model=ProfileResponse)
+@router.get(
+    "/profile",
+    response_model=ProfileResponse,
+    responses={404: {"description": "Profile not found"}},
+)
 def get_profile_endpoint(
-    user_id: str = Depends(get_current_user_id),
-    repo: IPasienRepository = Depends(get_repo)
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    repo: Annotated[IPasienRepository, Depends(get_repo)],
 ):
     try:
         pasien = get_profile(repo, user_id)
@@ -20,11 +26,15 @@ def get_profile_endpoint(
         raise HTTPException(status_code=404, detail="Profile not found")
 
 
-@router.put("/profile", response_model=ProfileResponse)
+@router.put(
+    "/profile",
+    response_model=ProfileResponse,
+    responses={404: {"description": "Profile not found"}},
+)
 def update_profile_endpoint(
     payload: UpdateProfilePayload,
-    user_id: str = Depends(get_current_user_id),
-    repo: IPasienRepository = Depends(get_repo)
+    user_id: Annotated[str, Depends(get_current_user_id)],
+    repo: Annotated[IPasienRepository, Depends(get_repo)],
 ):
     try:
         updated_pasien = update_profile(repo, user_id, payload)
