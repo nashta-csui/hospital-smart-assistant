@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime, timezone
 from uuid import UUID
 from unittest.mock import Mock, MagicMock, patch
 from sqlalchemy.orm import Session
