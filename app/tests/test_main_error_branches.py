@@ -6,6 +6,10 @@ from app.main import register_dokter, get_password_service, get_db
 from app.exceptions import InvalidPasswordError, DatabaseError
 from app.schemas.dokter import DokterRegisterRequest
 
+# Admin token untuk testing
+ADMIN_TOKEN = "test-admin-token-12345"
+ADMIN_HEADERS = {"Authorization": f"Bearer {ADMIN_TOKEN}"}
+
 
 def test_get_password_service_returns_instance():
     service = get_password_service()
@@ -38,7 +42,7 @@ def test_register_dokter_invalid_password(test_client, monkeypatch):
         "spesialisasi": "Test"
     }
 
-    response = test_client.post("/dokter/register", json=payload)
+    response = test_client.post("/dokter/register", json=payload, headers=ADMIN_HEADERS)
     assert response.status_code == 400
 
 def test_register_dokter_database_error(test_client, monkeypatch):
@@ -61,7 +65,7 @@ def test_register_dokter_database_error(test_client, monkeypatch):
         "spesialisasi": "Test"
     }
 
-    response = test_client.post("/dokter/register", json=payload)
+    response = test_client.post("/dokter/register", json=payload, headers=ADMIN_HEADERS)
     assert response.status_code == 500
 
 def test_register_dokter_unexpected_exception(test_client, monkeypatch):
@@ -84,7 +88,7 @@ def test_register_dokter_unexpected_exception(test_client, monkeypatch):
         "spesialisasi": "Test"
     }
 
-    response = test_client.post("/dokter/register", json=payload)
+    response = test_client.post("/dokter/register", json=payload, headers=ADMIN_HEADERS)
     assert response.status_code == 500
 
 def test_get_dokter_registration_service(test_db):
