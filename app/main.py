@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.models.base.base_model import Base
-from app.models.base.dokter import Dokter
 from app.config import settings
 from app.schemas.dokter import DokterRegisterRequest, DokterRegisterResponse
 from app.repositories.dokter_repository import SQLAlchemyDokterRepository
