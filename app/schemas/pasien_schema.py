@@ -1,14 +1,23 @@
-from typing import Literal, Optional
+from datetime import date
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 class UpdateProfilePayload(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    nama: Optional[str] = Field(None, min_length=3, max_length=100)
     no_telepon: Optional[str] = None
     alamat: Optional[str] = Field(None, min_length=3)
-    golongan_darah: Optional[Literal["A", "B", "AB", "O"]] = None
     password: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_immutable_fields(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            forbidden_fields = {"nama", "golongan_darah"}
+            sent_forbidden = sorted(forbidden_fields.intersection(data.keys()))
+            if sent_forbidden:
+                raise ValueError(f"Fields cannot be updated: {', '.join(sent_forbidden)}")
+        return data
 
     @field_validator("no_telepon", mode="before")
     @classmethod
@@ -41,7 +50,11 @@ class UpdateProfilePayload(BaseModel):
 
 class ProfileResponse(BaseModel):
     id_pasien: str
+    nomor_rekam_medis: str
     nama: str
     no_telepon: str
+    jenis_kelamin: str
+    tanggal_lahir: date
     alamat: str
+    email: str
     golongan_darah: str
