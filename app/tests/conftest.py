@@ -17,12 +17,19 @@ def test_db():
     Create a test database untuk setiap test function.
     Menggunakan in-memory SQLite untuk fast testing tanpa side effects.
     """
+    # For SQLite in-memory databases, each connection normally has its own isolated
+    # database. Tests that create tables on one connection then run queries on another
+    # will see "no such table" errors. Using StaticPool ensures all sessions use the
+    # same single connection so the schema creation is visible everywhere.
+    from sqlalchemy.pool import StaticPool
+
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL,
-        connect_args={"check_same_thread": False}
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
     )
     
-    # Create all tables
+    # Create all tables on the shared connection
     Base.metadata.create_all(engine)
     
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
