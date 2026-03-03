@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.models.rag.chunk_dokumen import ChunkDokumen
-from app.models.rag.consts import EMBEDDING_DIMS, EMBEDDING_MODEL_NAME
+from app.models.rag.consts import EMBEDDING_DIMS
 from app.models.rag.dokumen import Dokumen
 from app.services.ingest import chunk_text, ingest_documents, load_documents
 
@@ -123,27 +123,14 @@ class TestChunkText:
 
 
 class TestGetEmbeddingModel:
-    """Tests for get_embedding_model singleton loader."""
+    """Tests for get_embedding_model placeholder."""
 
-    @patch("app.services.SentenceTransformer")
-    def test_loads_correct_model(self, mock_st_class):
-        """Should load the model specified in EMBEDDING_MODEL_NAME."""
-        import app.services
+    def test_raises_not_implemented(self):
+        """Should raise NotImplementedError until LLM service is available."""
+        from app.services import get_embedding_model
 
-        app.services._embedding_model = None
-        app.services.get_embedding_model()
-        mock_st_class.assert_called_once_with(EMBEDDING_MODEL_NAME)
-
-    @patch("app.services.SentenceTransformer")
-    def test_returns_singleton(self, mock_st_class):
-        """Should return the same instance on subsequent calls."""
-        import app.services
-
-        app.services._embedding_model = None
-        model1 = app.services.get_embedding_model()
-        model2 = app.services.get_embedding_model()
-        assert model1 is model2
-        mock_st_class.assert_called_once()
+        with pytest.raises(NotImplementedError):
+            get_embedding_model()
 
 
 class TestIngestDocuments:
@@ -269,9 +256,7 @@ class TestIngestDocuments:
         assert count == 2
 
     @patch("app.services.ingest.get_embedding_model")
-    def test_commits_session(
-        self, mock_get_model, mock_embedding_model, tmp_data_dir
-    ):
+    def test_commits_session(self, mock_get_model, mock_embedding_model, tmp_data_dir):
         """Should commit the session after ingesting."""
         mock_get_model.return_value = mock_embedding_model
         session = MagicMock()

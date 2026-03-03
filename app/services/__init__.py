@@ -1,13 +1,9 @@
-from sentence_transformers import SentenceTransformer
+def get_embedding_model():
+    """
+    Get the embedding model for encoding text into vectors.
 
-from app.models.rag.consts import EMBEDDING_MODEL_NAME
-
-_embedding_model = None
-
-
-def get_embedding_model() -> SentenceTransformer:
-    """Lazy-load the shared embedding model singleton."""
-    global _embedding_model
-    if _embedding_model is None:
-        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
-    return _embedding_model
+    TODO: Will be replaced with an HTTP call to the LLM service.
+    """
+    raise NotImplementedError(
+        "Embedding model not available. This will be provided by the LLM service."
+    )
