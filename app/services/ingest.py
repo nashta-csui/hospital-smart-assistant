@@ -29,6 +29,7 @@ def load_documents(data_dir: Path) -> list[tuple[str, str]]:
         docs.append((txt_file.name, text))
     return docs
 
+
 def chunk_text(
     text: str,
     chunk_size: int = CHUNK_SIZE,

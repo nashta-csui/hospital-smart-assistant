@@ -269,9 +269,7 @@ class TestIngestDocuments:
         assert count == 2
 
     @patch("app.services.ingest.get_embedding_model")
-    def test_commits_session(
-        self, mock_get_model, mock_embedding_model, tmp_data_dir
-    ):
+    def test_commits_session(self, mock_get_model, mock_embedding_model, tmp_data_dir):
         """Should commit the session after ingesting."""
         mock_get_model.return_value = mock_embedding_model
         session = MagicMock()
