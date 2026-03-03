@@ -206,6 +206,23 @@ class TestIngestDocuments:
         assert "konten pertama" in doc_a.rawtext
 
     @patch("app.services.ingest.get_embedding_model")
+    def test_skips_empty_content_file(
+        self, mock_get_model, mock_embedding_model, tmp_path
+    ):
+        """Should skip chunking for files with only whitespace content."""
+        mock_get_model.return_value = mock_embedding_model
+        session = MagicMock()
+        (tmp_path / "RAG_Empty.txt").write_text("   \n\n  ", encoding="utf-8")
+
+        ingest_documents(session, tmp_path)
+
+        added = [call.args[0] for call in session.add.call_args_list]
+        dokumens = [obj for obj in added if isinstance(obj, Dokumen)]
+        chunks = [obj for obj in added if isinstance(obj, ChunkDokumen)]
+        assert len(dokumens) == 1
+        assert len(chunks) == 0
+
+    @patch("app.services.ingest.get_embedding_model")
     def test_empty_directory_returns_zero(
         self, mock_get_model, mock_embedding_model, empty_data_dir
     ):
