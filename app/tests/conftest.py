@@ -35,10 +35,7 @@ def empty_data_dir(tmp_path):
 @pytest.fixture
 def real_data_dir():
     """Path to the actual RAG data files in hospital-smart-assistant/data/."""
-    data_dir = Path(__file__).resolve().parent.parent.parent / "data"
-    if not data_dir.exists():
-        pytest.skip("data/ directory not found")
-    return data_dir
+    return Path(__file__).resolve().parent.parent.parent / "data"
 
 
 @pytest.fixture
