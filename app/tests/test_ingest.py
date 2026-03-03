@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.models.rag.chunk_dokumen import ChunkDokumen
-from app.models.rag.consts import EMBEDDING_DIMS
+from app.models.rag.consts import EMBEDDING_DIMS, EMBEDDING_MODEL_NAME
 from app.models.rag.dokumen import Dokumen
 from app.services.ingest import chunk_text, ingest_documents, load_documents
 
@@ -120,6 +120,30 @@ class TestChunkText:
         combined = " ".join(chunks)
         for word in ["Satu", "Dua", "Tiga", "Empat", "Lima"]:
             assert word in combined
+
+
+class TestGetEmbeddingModel:
+    """Tests for get_embedding_model singleton loader."""
+
+    @patch("app.services.SentenceTransformer")
+    def test_loads_correct_model(self, mock_st_class):
+        """Should load the model specified in EMBEDDING_MODEL_NAME."""
+        import app.services
+
+        app.services._embedding_model = None
+        app.services.get_embedding_model()
+        mock_st_class.assert_called_once_with(EMBEDDING_MODEL_NAME)
+
+    @patch("app.services.SentenceTransformer")
+    def test_returns_singleton(self, mock_st_class):
+        """Should return the same instance on subsequent calls."""
+        import app.services
+
+        app.services._embedding_model = None
+        model1 = app.services.get_embedding_model()
+        model2 = app.services.get_embedding_model()
+        assert model1 is model2
+        mock_st_class.assert_called_once()
 
 
 class TestIngestDocuments:
