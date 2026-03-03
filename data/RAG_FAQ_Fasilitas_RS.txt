@@ -1,0 +1,59 @@
+
+BUKU PANDUAN FASILITAS DAN LAYANAN RS. CINTA KASIH JAKARTA
+Versi 3.2 - Update Maret 2024
+
+A. JAM KUNJUNGAN PASIEN
+   A.1 Ruang Rawat Inap Reguler:
+       - Pagi: 10:00 - 13:00 WIB
+       - Sore: 17:00 - 20:00 WIB
+       - Maksimal 2 pengunjung per kamar per waktu.
+
+   A.2 Ruang ICU/HCU/ICCU:
+       - Pagi: 11:00 - 12:00 WIB (1 jam)
+       - Sore: 18:00 - 19:00 WIB (1 jam)
+       - Hanya keluarga inti (orang tua, pasangan, anak kandung).
+       - Wajib menggunakan APD sederhana (masker, hair cap, alas sepatu).
+       - Anak-anak di bawah 12 tahun dilarang masuk area ICU.
+
+B. TARIF PARKIR
+   B.1 Kendaraan Roda Dua:
+       - 0-2 jam: Rp 3.000
+       - 2-5 jam: Rp 5.000
+       - 5-12 jam: Rp 8.000
+       - >12 jam: Rp 10.000 (maksimal per hari)
+
+   B.2 Kendaraan Roda Empat:
+       - 0-2 jam: Rp 10.000
+       - 2-5 jam: Rp 15.000
+       - 5-12 jam: Rp 25.000
+       - >12 jam: Rp 40.000 (maksimal per hari)
+
+   B.3 Ketentuan Khusus:
+       - Pasien rawat inap mendapatkan kartu parkir gratis (1 mobil + 1 motor).
+       - Pengambilan kendaraan 24 jam dengan sistem barcode tiket.
+
+C. FASILITAS PENDUKUNG
+   C.1 Kantin RS:
+       - Lokasi: Lantai 2 (Dekat Farmasi) dan Lantai Ground (Belakang)
+       - Jam Operasional: 06:00 - 21:00 WIB
+       - Menu: Makanan pasien (sesuai diet), makanan umum, snack, minuman
+       - Pembayaran: Tunai, QRIS, Kartu Debit/Kredit
+       - Layanan delivery ke kamar pasien (biaya delivery Rp 10.000)
+
+   C.2 ATM Center:
+       - Lokasi: Lobi Utama (Samping Security)
+       - Tersedia: BCA, Mandiri, BNI, BRI, CIMB Niaga
+       - 24 jam operasional
+
+   C.3 Apotek/ Farmasi:
+       - Farmasi IGD: 24 jam
+       - Farmasi Umum: 07:00 - 21:00 WIB
+       - Farmasi Khusus (Onkologi): 08:00 - 17:00 WIB (Senin-Jumat)
+
+D. PROSEDUR DARURAT UGD
+   D.1 Nomor Darurat: 1500-567 atau 021-2987-6543
+   D.2 Hotline Ambulance: 1500-567 ext. 9
+   D.3 Prosedur Triase:
+       - Red Zone (Gawat): Penanganan <5 menit
+       - Yellow Zone (Sedang): Penanganan <30 menit
+       - Green Zone (Ringan): Antrean sesuai urutan
