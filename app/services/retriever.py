@@ -5,9 +5,7 @@ from app.models.rag.chunk_dokumen import ChunkDokumen
 from app.services import get_embedding_model
 
 
-def retrieve_chunks(
-    db: Session, query: str, top_k: int = 4
-) -> list[ChunkDokumen]:
+def retrieve_chunks(db: Session, query: str, top_k: int = 4) -> list[ChunkDokumen]:
     """
     Embed a query and find the closest document chunks via pgvector L2 distance.
 
